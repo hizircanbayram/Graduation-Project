@@ -1,0 +1,55 @@
+create_video_dataset.py
+    takeOneFrameFromEveryMovementInEveryVideo(main_dir='dataset_hij', target_dir='video_dataset')
+    # NOW WE HAVE video_dataset. 
+    move_xml_files_to(main_dir, target_dir)
+    # WE NOW HAVE video_dataset and their corresponding xml files. THUS WE CAN CREATE CLASS DATASET
+
+
+create_class_dataset.py
+    # CREATE DIRECTORIES NAMED 0, 1, 2, ..., 10 IN class_dataset DIRECTORY.
+    createClassDatasetFromVideoDataset(main_dir='video_dataset', target_dir='class_dataset')
+    INVOKE createClassDatasetFromVideoDataset() MULTIPLE TIMES UNTIL YOU HAVE ENOUGH AMOUNT OF FRAMES PER HAND MOVEMENT
+    # NOW WE HAVE class_dataset. 
+    checkFramesInCorrectDirectory(target_dir='class_dataset', main_dir='video_dataset')
+    # CHECKED IF THERE IS ANY MISPLACES FRAME IN DIRECTORIE SUCH AS 0,1,2, ..., 10
+
+USE PIXEL ANNOTATION TOOL AND CREATE SEGMENTED IMAGES.  
+
+quick_processing.py
+    delete_unnecessary_files(dir_path)
+    is_dir_name_okay(dir_path)
+    change_file_names(dir_path)
+    detect_missing_files(normal_dir_path, segmented_dir_path)
+
+
+automated_processing.py
+    # CHECK MANUALLY DIRECTORIES RECEIVED BY YOUR FRIENDS IF THEY HAVE ANOMALIY IMAGES SUCH AS
+    # ANNOTATING WITHOUT WHITE PIXELS, ANNOTATING IMAGES THAT DONT CONTAIN HANDS, # OF IMAGES IN THE DIRECTORIES ARE DIVISIBLE BY FOUR, ... AND CLEAN THEM.
+    check_pixels(dir_path)
+    # RIGHT NOW, SEGMENTED IMAGES THAT DONT HAVE ANY WRONG PIXEL INTENSITY VALUES ARE IN THE UnetDatasetProcedure/success/(hand no_person) 
+    # THUS ONLY NORMAL IMAGES ARE IN THE UnetDatasetProcedure/(hand no_person)
+    # IMAGES THAT HAVE ANY WRONG PIXEL INTENSITY VALUES AND THEIR CORRESPONDING IMAGES HAVE TO BE DELETED MANUALLY 
+    # BY CHECKING UnetDatasetProcedure/again/(hand no_person) and UnetDatasetProcedure/(hand no_person)  
+    move_images_to_the_dataset(dir_name)
+    # IMAGES NOW ARE IN UnetDataset/normal/name_(hand no) and UnetDataset/segmented/name_(hand no)
+    check_corresponding_images(dir_name)
+    # DELETE THE FILES POPPED UP ON THE TERMINAL
+
+
+manuel_processing.py
+    manuel_control(segmented_parent, normal_parent)
+    # WE NOW HAVE ONLY CORRECT IMAGES IN UnetDataset/normal/name_(hand no) and UnetDataset/segmented/name_(hand no)
+    # COPY IMAGES FROM THEIR OWN DIRECTORIES AND PASTE THEM INTO normal & segmented DIRECTORIES WHEN ALL THE DIRECTORIES ARE READY TO TRAIN!
+
+
+dataset_info.py
+    getMovementNumbers(img_dir)
+    # WE NOW HAVE THE SAMPLE NUMBER OF DATASET FOR EACH HAND MOVEMENT
+    ??? KAPPA VALUES FUNCTION
+    ??? AND ITS COMMENT
+    ??? SAMPLE IMAGES FUNCTION
+    ??? AND ITS COMMENT
+
+
+# ADD DIRECTORY STRUCTURE HERE
+# NOT: measure_kappa_metrics, data_generator, main, unet.py, predict.py MODULES ARE IN REMOTE COMPUTER
