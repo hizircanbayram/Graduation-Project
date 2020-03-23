@@ -51,5 +51,67 @@ dataset_info.py
     ??? AND ITS COMMENT
 
 
-# ADD DIRECTORY STRUCTURE HERE
+Data Processing Directory Structure
+UnetDataset
+    normal
+        0_mustafa
+        1_mustafa
+        2_hcan
+        3_furkan
+        4_olcan
+        5_yusuf
+        6_sumeyye
+        7_cenk
+        8_cenk
+        9_beyza
+        10_safa
+    segmented
+        0_mustafa
+        1_mustafa
+        2_hcan
+        3_furkan
+        4_olcan
+        5_yusuf
+        6_sumeyye
+        7_cenk
+        8_cenk
+        9_beyza
+        10_safa
+UnetDatasetProcedure
+    0_mustafa
+    1_mustafa
+    2_hcan
+    3_furkan
+    4_olcan
+    5_yusuf
+    6_sumeyye
+    7_cenk
+    8_cenk
+    9_beyza
+    10_safa
+    again
+        0_mustafa
+        1_mustafa
+        2_hcan
+        3_furkan
+        4_olcan
+        5_yusuf
+        6_sumeyye
+        7_cenk
+        8_cenk
+        9_beyza
+        10_safa
+    success
+        0_mustafa
+        1_mustafa
+        2_hcan
+        3_furkan
+        4_olcan
+        5_yusuf
+        6_sumeyye
+        7_cenk
+        8_cenk
+        9_beyza
+        10_safa
+
 # NOT: measure_kappa_metrics, data_generator, main, unet.py, predict.py MODULES ARE IN REMOTE COMPUTER
