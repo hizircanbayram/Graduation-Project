@@ -1,6 +1,8 @@
 import numpy as np
 import keras
-import cv2
+from keras.preprocessing.image import load_img
+from keras.preprocessing.image import img_to_array
+from keras.preprocessing.image import array_to_img
 
 
 class DataGenerator(keras.utils.Sequence):
@@ -67,14 +69,16 @@ class DataGenerator(keras.utils.Sequence):
                 print('Wrong typing of data_type!!')
                 
             # Image
-            sample = cv2.imread(dir_name + ID, 1)
+            #sample = cv2.imread(dir_name + ID, 1)
+            sample = img_to_array(load_img(dir_name + ID, color_mode='rgb', interpolation='bilinear'), dtype='uint8')
+            #print('X.shape: ', sample.shape)
             if sample is None:
                 print('rgb not read: ', dir_name + ID)
             sample = sample / 255.0
             X.append(sample)
-
             # Mask
-            sample = cv2.imread(dir_name + self.labels[ID], cv2.IMREAD_GRAYSCALE) 
+            #sample = cv2.imread(dir_name + self.labels[ID], cv2.IMREAD_GRAYSCALE) 
+            sample =   img_to_array(load_img(dir_name + self.labels[ID], color_mode='grayscale', interpolation='bilinear'), dtype='uint8')[:,:,0]
             if sample is None:
                 print('gray not read: ', dir_name + self.labels[ID])
             sample = sample / 255.0
