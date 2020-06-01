@@ -12,9 +12,13 @@ def getHandArea(frame, mask):
     return new_frame
 
 
-def get_mask(model, img):
-    # BGR goruntu ile calisir
-    img = img / 255.0
+def get_mask(model, img, nth_frame):
+    if nth_frame > 0:
+        img[:,:,0:3] = img[:,:,0:3] / 255.
+        img[:,:,3] = img[:,:,3] / 180.
+        img[:,:,4] = img[:,:,4] / 255.
+    else:
+        img = img / 255.
     img = img[np.newaxis, :, :, :]        
     segmented_pred = model.predict(img)
     segmented_pred = segmented_pred[0]

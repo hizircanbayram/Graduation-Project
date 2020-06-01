@@ -6,9 +6,9 @@ from keras.preprocessing.image import img_to_array
 from keras.preprocessing.image import array_to_img
 import matplotlib.pyplot as plt
 
-class DataGenerator(keras.utils.Sequence):
+class MotionDataGenerator(keras.utils.Sequence):
     'Generates data for Keras'
-    def __init__(self, train_dir, data_type, list_IDs, labels, batch_size=32, dim=(32,32,32), nth_frame_for_motion=1, shuffle=True):
+    def __init__(self, train_dir, data_type, list_IDs, labels, nth_frame_for_motion=1, optical_flow_dir=None, dim=(32,32,32), batch_size=32, shuffle=True):
         'Initialization'
         self.train_dir = train_dir
         self.dim = dim
@@ -18,6 +18,7 @@ class DataGenerator(keras.utils.Sequence):
         self.shuffle = shuffle
         self.data_type = data_type
         self.nth_frame_for_motion = nth_frame_for_motion
+        self.optical_flow_dir = optical_flow_dir
         self.on_epoch_end()
 
 
@@ -83,7 +84,7 @@ class DataGenerator(keras.utils.Sequence):
             sample = img_to_array(load_img(dir_name + ID, color_mode='rgb', interpolation='bilinear', target_size=(self.dim[0], self.dim[1], 3)), dtype='uint8')
             # optical flow
             sample_gray = img_to_array(load_img(dir_name + ID, color_mode='grayscale', interpolation='bilinear', target_size=(self.dim[0], self.dim[1], 3)), dtype='uint8')
-            sample_gray_next = img_to_array(load_img(self.getNextNthFrameName('optical_flow_imgs_1/' + ID), color_mode='grayscale', interpolation='bilinear', target_size=(self.dim[0], self.dim[1], 3)), dtype='uint8')
+            sample_gray_next = img_to_array(load_img(self.getNextNthFrameName(self.optical_flow_dir + ID), color_mode='grayscale', interpolation='bilinear', target_size=(self.dim[0], self.dim[1], 3)), dtype='uint8')
             flow = cv2.calcOpticalFlowFarneback(sample_gray,sample_gray_next, None, 0.5, 3, 15, 3, 5, 1.2, 0)
             mag, ang = cv2.cartToPolar(flow[...,0], flow[...,1])
             ang = ang*180/np.pi/2 # need to be normalized, just like normal rgb hand images. it will be normalized below.
