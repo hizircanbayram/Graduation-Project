@@ -35,9 +35,10 @@ def fill_infos(train_dir, validation_dir):
 params = {'dim': (256,256,5),
           'batch_size': 8,
           'shuffle': True} 
-optical_flow_dir = 'optical_flow_imgs_2/'
-fpath = "check_points/unet20_50_256_motion_2_normalized/" + "motion_unet20_{epoch:02d}-{val_accuracy:.2f}.hdf5"
 nth_frame = 2
+optical_flow_dir = 'optical_flow_imgs_' + str(nth_frame) + '/'
+fpath = "check_points/unet20_50_256_motion_" + str(nth_frame) + '_normalized/' + "without_normalized_motion_unet20_{epoch:02d}-{val_accuracy:.2f}.hdf5"
+
 
 training_dir = 'UnetDataset_v4'
 partition, labels = fill_infos(training_dir + '/train', training_dir + '/validation')
