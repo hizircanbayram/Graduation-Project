@@ -29,7 +29,7 @@ dependencies = {
 model = load_model(model_path, custom_objects=dependencies)
 #model = unet()
 #print(model.summary())
-
+my_key = False
 while(True):
     # Capture frame-by-frame
     ret, frame = cap.read()
@@ -41,18 +41,30 @@ while(True):
     hand_img = getHandArea(frame_resized, mask)   
     #for c in contours:
     contours = sorted(contours, key=cv2.contourArea, reverse=True)
-    rect = cv2.minAreaRect(contours[0])
     indices = []
-    box = cv2.boxPoints(rect)
-    box = np.int0(box)
-    p1, p2 = getBB(box)
-    cv2.rectangle(frame_resized, p1, p2, (255,0,0), 2)
+    rect1 = cv2.minAreaRect(contours[0])
+    box1 = cv2.boxPoints(rect1)
+    box1 = np.int0(box1)
+    rect2 = cv2.minAreaRect(contours[1])
+    box2 = cv2.boxPoints(rect2)
+    box2 = np.int0(box2)
+    
+    p1_1, p1_2 = getBB(box1)
+    p2_1, p2_2 = getBB(box2)
+    box2_area = (p2_2[0] - p2_1[0]) * (p2_2[1] - p2_1[1])
+    if box2_area != 0:
+        print('contour 2, area: ', box2_area)
+        cv2.rectangle(frame_resized, p2_1, p2_2, (0,255,0), 2)
+        my_key = True
+    cv2.rectangle(frame_resized, p1_1, p1_2, (255,0,0), 2)
 
     # Display the resulting frame
     cv2.imshow('frame',frame_resized)
+    if my_key:
+        cv2.waitKey(0)
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
-
+    my_key = False
   
 # When everything done, release the capture
 cap.release()
