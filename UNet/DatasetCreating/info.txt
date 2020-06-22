@@ -1,0 +1,15 @@
+DataProcessing klasorunde de veri kumesi olusturulamaktadir, bu klasorde de. Burada olusturulan veri kumesinin farki direkt olarak model egitimlerinde kullanilacak veri kumelerinin olusturulmasidir.
+
+
+CreatingDataset/UnetDataset klasorunden (icinde normal/0-1-...-10 ve segmented/0-1-...-10 klasorleri vardir bu UnetDataset klasorunun) train validation ve test klasorleri olusturmak icin asagidakileri yapmak gerekmektedir:
+UnetDataset klasorunun icindeki normal ve segmented klasorlerinin yanina test, train ve validation klasorleri olusturulur. Ardindan burada create_ttv script'i calistirilir.
+Boylece train, test, validation klasorleri olusturulmus olur.
+Eger bu uc klasorden dort ayri veri kumesi yapilmak isteniyorsa(v1(2200 goruntu), v2(4400 goruntu), v3(6600 goruntu), v4(tamami)) asagidaki yapilmalidir.
+    * Zaten test ve validation klasorleri tum veri kumelerinde(v1,v2,v3,v4) ayni oldugundan sadece training veri kumesinden farkli numunelerde olusturulacaktir.
+    * UnetDataset_v1, UnetDataset_v2, UnetDataset_v3 isimlerinde klasorler olusturup ucunun de icine ayri ayri train klasorleri olustur.
+    * create_new_datasets script'ini calistir.
+    * test & validation klasorlerini UnetDataset_v1, UnetDataset_v2, UnetDataset_v3 klasorlerine kopyala.
+    * UnetDataset_v4 isimli bir klasor olustur ve DatasetCreating klasoru icindeki train, test, validation klasorlerini kesip bu UnetDataset_v4 klasorune yapistir
+    * UnetDataset_v1, UnetDataset_v2, UnetDataset_v3, UnetDataset_v4 klasorlerini Model klasorunun altina tasi ve model calismalarina basla!
+    * make_black scriptini calistirarak veri etiketleme sirasinda 255 ve 0 disinda atanmis deger varsa onlarin tekrar 0 ve 255 olmasini sagla
+    * eger 2. sinifa ait goruntuler suni goruntler ise, delete_2 script'ini calistirarak onlardan kurtul.
