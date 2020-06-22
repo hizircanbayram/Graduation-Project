@@ -12,6 +12,7 @@ from keras.preprocessing.image import img_to_array
 
 
 def getBB(points):
+    #print(points)
     points = np.transpose(np.array(points))
     x1 = min(points[0])
     y1 = min(points[1])
@@ -41,27 +42,45 @@ while(True):
     hand_img = getHandArea(frame_resized, mask)   
     #for c in contours:
     contours = sorted(contours, key=cv2.contourArea, reverse=True)
-    indices = []
+    #indices = []
     rect1 = cv2.minAreaRect(contours[0])
     box1 = cv2.boxPoints(rect1)
     box1 = np.int0(box1)
-    rect2 = cv2.minAreaRect(contours[1])
-    box2 = cv2.boxPoints(rect2)
-    box2 = np.int0(box2)
+    p3_1, p3_2 = getBB(box1)
+    #cv2.rectangle(frame_resized, p3_1, p3_2, (0,0,255), 2)   
+    indices = None
+    if len(contours) > 1:
+        rect2 = cv2.minAreaRect(contours[1])
+        box2 = cv2.boxPoints(rect2)
+        box2 = np.int0(box2)
+        p2_1, p2_2 = getBB(box2)
+        box2_area = (p2_2[0] - p2_1[0]) * (p2_2[1] - p2_1[1])
+        #print('cons')
+        if box2_area > 1000:
+            #print('> 100')
+            indices = box1.tolist() + box2.tolist()
+            #print(type(box1))
+            #print('b1', box1, 'b2', box2, 'b3', indices)
+            #cv2.waitKey(0)
+        else:
+            indices = box1.tolist()   
+    else:
+        #print('else')
+        indices = box1.tolist()
+
+    p1_1, p1_2 = getBB(indices)
+        
     
-    p1_1, p1_2 = getBB(box1)
-    p2_1, p2_2 = getBB(box2)
-    box2_area = (p2_2[0] - p2_1[0]) * (p2_2[1] - p2_1[1])
-    if box2_area != 0:
-        print('contour 2, area: ', box2_area)
-        cv2.rectangle(frame_resized, p2_1, p2_2, (0,255,0), 2)
+    if box2_area >= 1000:
+        #print('contour 2, area: ', box2_area)
+        #cv2.rectangle(frame_resized, p2_1, p2_2, (0,255,0), 2)
         my_key = True
     cv2.rectangle(frame_resized, p1_1, p1_2, (255,0,0), 2)
 
     # Display the resulting frame
     cv2.imshow('frame',frame_resized)
-    if my_key:
-        cv2.waitKey(0)
+    #if my_key:
+    #    cv2.waitKey(0)
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
     my_key = False
