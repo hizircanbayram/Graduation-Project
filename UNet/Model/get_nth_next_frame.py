@@ -24,12 +24,13 @@ def getImgName(frame_no_str):
 
         
 def createFileNames(pixel_ahead_no):
+    import os
     test_file_names = os.listdir('UnetDataset_v4/test')
     valid_file_names = os.listdir('UnetDataset_v4/validation')
     train_file_names = os.listdir('UnetDataset_v4/train')
     file_names = [ file_name for file_name in (test_file_names + valid_file_names + train_file_names) if file_name.endswith('.jpg') ]
     print(len(file_names))
-    parsed_file_names = sorted([file_name.split('-')[0] + '.mp4/normal/' + getImgName(str(int(file_name.split('-')[1]) + pixel_ahead_no)) + '.png' + '-' + file_name.split('-')[2][0:1] for file_name in file_names])
+    parsed_file_names = sorted([file_name.split('-')[0] + '.mp4/normal/' + getImgName(str(int(file_name.split('-')[1]) + pixel_ahead_no)) + '.png' + '-' + file_name.split('-')[2][0:len(file_name.split('-')[2]) - 4] for file_name in file_names])
     print(len(parsed_file_names))
     f = open("names.txt", "w")
     for p_name in parsed_file_names:
@@ -75,4 +76,6 @@ def revertBackFileNames():
             print(video_name, frame_no_str, movement_no)
 
 
-revertBackFileNames()
+
+createFileNames(2)
+#revertBackFileNames()
