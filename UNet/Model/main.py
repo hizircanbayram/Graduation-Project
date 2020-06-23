@@ -11,11 +11,12 @@ def fill_infos(train_dir, validation_dir):
     labels = { }
 
     train_image_names = os.listdir(train_dir)
-    train_image_names = [img_name for img_name in train_image_names if img_name.endswith('.jpg')] 
+    print(train_image_names[0])
+    train_image_names = [img_name for img_name in train_image_names if img_name.endswith('.jpg') and img_name.split('-')[2][:-4] != '2'] 
     partition['train'].extend(train_image_names)
 
     validation_image_names = os.listdir(validation_dir)
-    validation_image_names = [img_name for img_name in validation_image_names if img_name.endswith('.jpg')] 
+    validation_image_names = [img_name for img_name in validation_image_names if img_name.endswith('.jpg') and img_name.split('-')[2][:-4] != '2'] 
     partition['validation'].extend(validation_image_names)
 
     all_image_names = partition['train'].copy()
@@ -37,7 +38,7 @@ params = {'dim': (256,256,5),
           'shuffle': True} 
 nth_frame = 2
 optical_flow_dir = 'optical_flow_imgs_' + str(nth_frame) + '/'
-fpath = "check_points/unet20_50_256_motion_" + str(nth_frame) + '_normalized/' + "without_normalized_motion_unet20_{epoch:02d}-{val_accuracy:.2f}.hdf5"
+fpath = "check_points/unet20_50_256_motion_" + str(nth_frame) + '_unet_normalized/' + "motion_unet34_{epoch:02d}-{val_accuracy:.2f}.hdf5"
 
 
 training_dir = 'UnetDataset_v4'
@@ -47,8 +48,9 @@ validation_generator = MotionDataGenerator(training_dir, 'validation', partition
 
 check_point = ModelCheckpoint(fpath, monitor='val_accuracy',
                               verbose=2, save_best_only=True, mode='max')
-model = unet(input_size=params['dim'])  
 
+model = unet(input_size=params['dim'])  
+#model.load_weights('check_points/unet20_30_256_motion_2_normalized/motion_unet22_19-0.96.hdf5')
 history = model.fit_generator(generator=training_generator,
                     validation_data=validation_generator,
                     callbacks=[check_point],
@@ -71,3 +73,6 @@ plt.ylabel('loss')
 plt.xlabel('epoch')
 plt.legend(['train', 'test'], loc='upper left')
 plt.show()
+
+
+#training_generator.__getitem__(0)

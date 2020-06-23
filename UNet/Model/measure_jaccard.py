@@ -46,19 +46,22 @@ def measure_jaccard(model, img_names, nth_frame, img_width_height, optical_flow_
         ########
         if nth_frame > 0:
             x_inp = np.zeros((img_width_height, img_width_height, 5))
-            sample_gray = img_to_array(load_img(rgb_img_name, color_mode='grayscale', interpolation='bilinear', target_size=(img_width_height,img_width_height,3)), dtype='uint8')
-            only_img_name = rgb_img_name.split('/')[2]
-            splitted_name = only_img_name.split('-')
-            next_frame_name = optical_flow_dir + splitted_name[0] + '-' + str(int(splitted_name[1]) + nth_frame) + '-' + splitted_name[2]
-            sample_gray_next = img_to_array(load_img(next_frame_name, color_mode='grayscale', interpolation='bilinear', target_size=(img_width_height,img_width_height,3)), dtype='uint8')
-            flow = cv2.calcOpticalFlowFarneback(sample_gray,sample_gray_next, None, 0.5, 3, 15, 3, 5, 1.2, 0)
-            mag, ang = cv2.cartToPolar(flow[...,0], flow[...,1])
-            ang = ang*180/np.pi/2 # need to be normalized, just like normal rgb hand images. it will be normalized below.
-            mag = cv2.normalize(mag,None,0,255,cv2.NORM_MINMAX) # need to be normalized, just like normal rgb hand images. it will be normalized below.
+            #sample_gray = img_to_array(load_img(rgb_img_name, color_mode='grayscale', interpolation='bilinear', target_size=(img_width_height,img_width_height,3)), dtype='uint8')
+            #only_img_name = rgb_img_name.split('/')[2]
+            #splitted_name = only_img_name.split('-')
+            #next_frame_name = optical_flow_dir + splitted_name[0] + '-' + str(int(splitted_name[1]) + nth_frame) + '-' + splitted_name[2]
+            #sample_gray_next = img_to_array(load_img(next_frame_name, color_mode='grayscale', interpolation='bilinear', target_size=(img_width_height,img_width_height,3)), dtype='uint8')
+            #flow = cv2.calcOpticalFlowFarneback(sample_gray,sample_gray_next, None, 0.5, 3, 15, 3, 5, 1.2, 0)
+            #mag, ang = cv2.cartToPolar(flow[...,0], flow[...,1])
+            #ang = ang*180/np.pi/2 # need to be normalized, just like normal rgb hand images. it will be normalized below.
+            #mag = cv2.normalize(mag,None,0,255,cv2.NORM_MINMAX) # need to be normalized, just like normal rgb hand images. it will be normalized below.
             # UnetDataset_v4/test/HIJEL_3004 (12)-506-0.jpg
             x_inp[:,:,0:3] = sample 
-            x_inp[:,:,3] = ang
-            x_inp[:,:,4] = mag 
+            #print(optical_flow_dir + img_name.split('/')[2][:len(img_name.split('/')[2]) - 14] + '.jpg')
+            optical_flow_img = cv2.imread(optical_flow_dir + img_name.split('/')[2][:len(img_name.split('/')[2]) - 14] + '.jpg')
+            optical_flow_img_hsv = cv2.cvtColor(optical_flow_img, cv2.COLOR_BGR2HSV)        
+            x_inp[:,:,3] = optical_flow_img_hsv[:,:,0] 
+            x_inp[:,:,4] = optical_flow_img_hsv[:,:,2] 
         else:
             x_inp = sample
         ########     
@@ -70,6 +73,5 @@ def measure_jaccard(model, img_names, nth_frame, img_width_height, optical_flow_
     preds = preds / 255 # 0 ve 255 sayilari, 0 ve 1 sayilarina indirgensinki jaccard_score fonksiyonu binary modda calisabilsin
     grounds = np.around(grounds / 255)
     return jaccard_score(y_pred=preds, y_true=grounds)
-
 
 
