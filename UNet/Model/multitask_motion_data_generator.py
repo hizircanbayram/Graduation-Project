@@ -114,6 +114,10 @@ class MotionDataGenerator(keras.utils.Sequence):
                 print('gray not read: ', dir_name + self.labels[ID])
             sample = sample / 255.0
             y.append(sample)
+            motion_y = np.zeros((self.dim[0], self.dim[1], 2))
+            motion_y[:,:,0] = optical_flow_img_hsv[:,:,0] / 180.
+            motion_y[:,:,1] = optical_flow_img_hsv[:,:,2] / 255.
+            y2.append(motion_y)
             #axarr[0][0].imshow(X[i].astype('uint8'))
             #axarr[0][1].imshow(y[i].astype('uint8'))
             #f.show()
@@ -121,9 +125,10 @@ class MotionDataGenerator(keras.utils.Sequence):
             
         X = np.array(X)
         y = np.array(y)
+        y2 = np.array(y2)
         y = y[:, :, :, np.newaxis]
         #y2 = y2[:, :, :, np.newaxis]
         #print('y.shape: ', y.shape)
         #print('y2.shape: ', y2.shape)
-        return X, y
+        return X, y2
 

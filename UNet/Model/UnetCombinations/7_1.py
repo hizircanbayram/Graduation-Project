@@ -41,23 +41,25 @@ partition, labels = fill_infos(training_dir + '/train', training_dir + '/validat
 training_generator   = DataGenerator(training_dir, 'train', partition['train'], labels, **params)
 validation_generator = DataGenerator(training_dir, 'validation', partition['validation'], labels, **params)
 
-#fpath = "check_points/small_unet_v2/UnetDataset_v4/" + training_dir + "_small_UNet_v2_{epoch:02d}-{val_accuracy:.2f}_100.hdf5"
+fpath = "check_points/small_unet_v2/UnetDataset_v4/" + training_dir + "_small_UNet_v2_{epoch:02d}-{val_accuracy:.2f}_100.hdf5"
 
 
 check_point = ModelCheckpoint(fpath, monitor='val_accuracy',
                               verbose=2, save_best_only=True, mode='max')
 model = unet(input_size=params['dim'])  
-
+'''
 model.fit_generator(generator=training_generator,
                     validation_data=validation_generator,
                     callbacks=[check_point],
-                    epochs=2, verbose=2,
+                    epochs=20, verbose=1,
                     use_multiprocessing=True, workers=12)
-
+'''
+from keras.models import load_model
+model = load_model('check_points/unet7/UnetDataset_v1/unet7.hdf5')
 
 from numeric_test import jaccard_general
 
-jaccard_general(model, training_dir + '/train')
-jaccard_general(model, training_dir + '/test')
-jaccard_general(model, training_dir + '/validation') 
+#jaccard_general(model, training_dir + '/train', 0, 512, None)
+jaccard_general(model, training_dir + '/test', 0, 512, None)
+jaccard_general(model, training_dir + '/validation', 0, 512, None) 
 

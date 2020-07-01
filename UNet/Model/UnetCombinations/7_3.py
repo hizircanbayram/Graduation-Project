@@ -51,13 +51,13 @@ model = unet(input_size=params['dim'])
 model.fit_generator(generator=training_generator,
                     validation_data=validation_generator,
                     callbacks=[check_point],
-                    epochs=2, verbose=2,
+                    epochs=2, verbose=1,
                     use_multiprocessing=True, workers=12)
 
 
 from numeric_test import jaccard_general
 
-jaccard_general(model, training_dir + '/train')
-jaccard_general(model, training_dir + '/test')
-jaccard_general(model, training_dir + '/validation') 
+jaccard_general(model, training_dir + '/train', 0, 512, None)
+jaccard_general(model, training_dir + '/test', 0, 512, None)
+jaccard_general(model, training_dir + '/validation', 0, 512, None)  
 
