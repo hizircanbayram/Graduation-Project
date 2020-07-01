@@ -1,27 +1,34 @@
 import os
-from unet20 import unet
-from keras.models import Sequential
-from denseNetGenerator import DataGenerator
-from keras.callbacks import ModelCheckpoint
 import matplotlib.pyplot as plt
 
+from keras.models import Sequential
+from keras.callbacks import ModelCheckpoint
+
+from denseNetGenerator import DataGenerator
+from denseNet import build_denseNet
 
 
-def fill_infos(train_dir, validation_dir):
+
+
+def fill_infos(dataset_dir):
     partition = { 'train': [], 'validation' : [] }
     labels = { }
 
-    train_img_names = []
-    train_dirs = os.listdir(train_dir)
-    for sample_train_dir in train_dirs: # sample_train_dir : directory of one vid
+    train_dir = dataset_dir + '/train' 
+    validation_dir = dataset_dir + '/validation'
+    
+    train_image_names = []
+    sample_train_dirs = os.listdir(train_dir)
+    for sample_train_dir in sample_train_dirs: # sample_train_dir : directory of one vid
         train_img_names_dir = os.listdir(train_dir + '/' + sample_train_dir) # train_img_names : image names in the directory of that vid
         train_image_names.extend(train_img_names_dir)
-    #print(train_image_names[0])
-    train_image_names = [img_name for img_name in train_image_names if img_name.endswith('.jpg') and img_name.split('-')[2][:-4] != 'NoWashing'] 
     partition['train'].extend(train_image_names)
 
-    validation_image_names = os.listdir(validation_dir)
-    validation_image_names = [img_name for img_name in validation_image_names if img_name.endswith('.jpg') and img_name.split('-')[2][:-4] != 'NoWashing'] 
+    validation_image_names = []
+    sample_validation_dirs = os.listdir(validation_dir)
+    for sample_validation_dir in sample_validation_dirs: # sample_train_dir : directory of one vid
+        validation_img_names_dir = os.listdir(validation_dir + '/' + sample_validation_dir) # train_img_names : image names in the directory of that vid
+        validation_image_names.extend(validation_img_names_dir)
     partition['validation'].extend(validation_image_names)
 
     all_image_names = partition['train'].copy()
@@ -35,9 +42,9 @@ def fill_infos(train_dir, validation_dir):
 
 def getOneHotLabel(img_name):
     label = img_name.split('-')[2][:-4]
-    if label == 'NoWashingBlack':
+    if label == 'NoWashing':
         return [1,0,0,0,0,0,0,0,0,0,0,0]
-    elif label == 'WetAndApplySoam':
+    elif label == 'WetAndApplySoap':
         return [0,1,0,0,0,0,0,0,0,0,0,0] 
     elif label == 'RubPalmToPalm':
         return [0,0,1,0,0,0,0,0,0,0,0,0]
@@ -57,39 +64,48 @@ def getOneHotLabel(img_name):
         return [0,0,0,0,0,0,0,0,0,1,0,0] 
     elif label == 'RubLeftFingerTips':
         return [0,0,0,0,0,0,0,0,0,0,1,0] 
-    elif label == 'RinseHand':
+    elif label == 'RinseHands':
         return [0,0,0,0,0,0,0,0,0,0,0,1] 
     else:
         print(label, 'wrong') 
 
 
 
-# Parameters
-params = {'dim': (256,256,5),
+
+
+params = {'dim': (256,256,3),
           'batch_size': 8,
           'shuffle': True} 
-nth_frame = 2
-optical_flow_dir = 'optical_flow_imgs_' + str(nth_frame) + '/'
-fpath = "check_points/unet20_50_256_motion_" + str(nth_frame) + '_unet_normalized/' + "motion_unet34_{epoch:02d}-{val_accuracy:.2f}.hdf5"
+fpath = "check_points/DenseNetWithoutUnet/" + "DenseNet_{epoch:02d}-{val_accuracy:.2f}.hdf5"
+dataset_dir = 'Classifier'
 
-
-training_dir = 'UnetDataset_v4'
-partition, labels = fill_infos(training_dir + '/train', training_dir + '/validation')
-training_generator   = MotionDataGenerator(training_dir, 'train', partition['train'], labels, nth_frame, optical_flow_dir, **params)
-validation_generator = MotionDataGenerator(training_dir, 'validation', partition['validation'], labels, nth_frame, optical_flow_dir, **params)
+nth_frame = 0
+optical_flow_dir = None
+partition, labels = fill_infos(dataset_dir)
+training_generator   = DataGenerator(dataset_dir, 'train', partition['train'], labels, nth_frame, optical_flow_dir, **params)
+validation_generator = DataGenerator(dataset_dir, 'validation', partition['validation'], labels, nth_frame, optical_flow_dir, **params)
 
 check_point = ModelCheckpoint(fpath, monitor='val_accuracy',
                               verbose=2, save_best_only=True, mode='max')
 
-model = unet(input_size=params['dim'])  
+model = build_denseNet(params['dim'], 12)
+
+
+
+
+
+
 #model.load_weights('check_points/unet20_30_256_motion_2_normalized/motion_unet22_19-0.96.hdf5')
 history = model.fit_generator(generator=training_generator,
                     validation_data=validation_generator,
                     callbacks=[check_point],
-                    epochs=50, verbose=1,
-                    use_multiprocessing=True, workers=12)
+                    epochs=50, verbose=1)
+                    #use_multiprocessing=True, workers=12)
 
-# summarize history for accuracy
+
+
+
+
 plt.plot(history.history['accuracy'])
 plt.plot(history.history['val_accuracy'])
 plt.title('model accuracy')
@@ -105,6 +121,3 @@ plt.ylabel('loss')
 plt.xlabel('epoch')
 plt.legend(['train', 'test'], loc='upper left')
 plt.show()
-
-
-#training_generator.__getitem__(0)

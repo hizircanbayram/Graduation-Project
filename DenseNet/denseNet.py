@@ -12,7 +12,7 @@ from keras.layers import Dense, Activation, Dropout,Flatten,\
                          Input, GlobalAveragePooling2D,\
                          TimeDistributed,LSTM,\
                          AveragePooling2D, Concatenate, BatchNormalization
-
+from keras.optimizers import Adam
 
 
 # %%
@@ -91,7 +91,8 @@ def build_denseNet(input_shape, numOfCatg, opt=Adam(), growth_rate=32, theta=0.5
     
     # Compile model
     model.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
-    return model;
+    model.summary()
+    return model
 
 # %%
 
