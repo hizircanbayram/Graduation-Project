@@ -20,14 +20,16 @@ def fill_infos(dataset_dir):
     train_image_names = []
     sample_train_dirs = os.listdir(train_dir)
     for sample_train_dir in sample_train_dirs: # sample_train_dir : directory of one vid
-        train_img_names_dir = os.listdir(train_dir + '/' + sample_train_dir) # train_img_names : image names in the directory of that vid
+        train_img_names_dir = os.listdir(train_dir + '/' + sample_train_dir) # train_img_names_dir : image names in the directory of that vid
+        train_img_names_dir = [sample_train_dir + '/' + img_names for img_names in train_img_names_dir]
         train_image_names.extend(train_img_names_dir)
     partition['train'].extend(train_image_names)
 
     validation_image_names = []
     sample_validation_dirs = os.listdir(validation_dir)
-    for sample_validation_dir in sample_validation_dirs: # sample_train_dir : directory of one vid
-        validation_img_names_dir = os.listdir(validation_dir + '/' + sample_validation_dir) # train_img_names : image names in the directory of that vid
+    for sample_validation_dir in sample_validation_dirs: # sample_validation_dir : directory of one vid
+        validation_img_names_dir = os.listdir(validation_dir + '/' + sample_validation_dir) # validation_img_names : image names in the directory of that vid
+        validation_img_names_dir = [sample_validation_dir + '/' + img_names for img_names in validation_img_names_dir]
         validation_image_names.extend(validation_img_names_dir)
     partition['validation'].extend(validation_image_names)
 
@@ -73,8 +75,8 @@ def getOneHotLabel(img_name):
 
 
 
-params = {'dim': (256,256,3),
-          'batch_size': 8,
+params = {'dim': (512,512,3),
+          'batch_size': 128,
           'shuffle': True} 
 fpath = "check_points/DenseNetWithoutUnet/" + "DenseNet_{epoch:02d}-{val_accuracy:.2f}.hdf5"
 dataset_dir = 'Classifier'
@@ -99,8 +101,8 @@ model = build_denseNet(params['dim'], 12)
 history = model.fit_generator(generator=training_generator,
                     validation_data=validation_generator,
                     callbacks=[check_point],
-                    epochs=50, verbose=1)
-                    #use_multiprocessing=True, workers=12)
+                    epochs=50, verbose=1,
+                    use_multiprocessing=True, workers=4)
 
 
 

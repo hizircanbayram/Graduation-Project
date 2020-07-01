@@ -69,7 +69,7 @@ class DataGenerator(keras.utils.Sequence):
         # Generate data
         for i, ID in enumerate(list_IDs_temp):
             # Store sample
-            dir_name = self.train_dir + self._data_type
+            dir_name = self.train_dir + '/' + self.data_type + '/'
             # Image
             x_inp = np.zeros(self.dim)
             sample = img_to_array(load_img(dir_name + ID, color_mode='rgb', interpolation='bilinear', target_size=(self.dim[0], self.dim[1], 3)), dtype='uint8')
@@ -110,7 +110,7 @@ class DataGenerator(keras.utils.Sequence):
             
         X = np.array(X)
         y = np.array(y)
-        y = y[:, :, :, np.newaxis]
+        #y = y[:, :, :, np.newaxis]
         #y2 = y2[:, :, :, np.newaxis]
         #print('y.shape: ', y.shape)
         #print('y2.shape: ', y2.shape)
