@@ -142,6 +142,7 @@ while(True):
     indices = []
     box1_area = None
     box2_area = None
+    cropped_hand_img = cv2.resize(frame_bgr, (256,256))
 
     if len(contours) >= 1:
         rect1 = cv2.minAreaRect(contours[0])
@@ -163,20 +164,19 @@ while(True):
         if box2_area > 1000:
             indices = addPOintsToTheList(indices, lm, rm, tm, bm) # adding points to the real list where the BB of the hands will be extracted
             drawExtremePoints(frame_bgr, lm, rm, tm, bm, (0,255,0))
-    if len(contours) >= 1 and len(indices) > 0:
+    if len(contours) >= 1 and len(indices) > 0: # one of them is contours,the other is  indices. dont confuse
         p_main_1, p_main_2 = getBB(indices)
         central_bb_p1, central_bb_p2 = getCentralBB(p_main_1, p_main_2)
+        cropped_hand_img = frame_bgr[central_bb_p1[1] : central_bb_p2[1], central_bb_p1[0] : central_bb_p2[0]]
         lame_bb_p1, lame_bb_p2 = getLameBB(p_main_1, p_main_2)
-        if central_bb_p2[0] - central_bb_p1[0] != 256:
-            print('x not 256' )
-        if central_bb_p2[1] - central_bb_p1[1] != 256:
-            print('y not 256')
+        #if (central_bb_p2[0] - central_bb_p1[0] != 256) or (central_bb_p2[1] - central_bb_p1[1] != 256):
+            
         cv2.rectangle(frame_bgr, central_bb_p1, central_bb_p2, (255,255,255), 1) # white: square
         cv2.rectangle(frame_bgr, lame_bb_p1, lame_bb_p2, (0,0,0), 2) # black: square
         cv2.rectangle(frame_bgr, p_main_1, p_main_2, (0,0,255), 1) # red: rectangle
         
     # Display the resulting frame
-    cv2.imshow('frame', frame_bgr)
+    cv2.imshow('frame', cropped_hand_img)
     #cv2.waitKey(0)
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
