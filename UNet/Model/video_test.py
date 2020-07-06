@@ -41,14 +41,25 @@ def getLameBB(p_main_1, p_main_2):
 
     return central_bb_p1, central_bb_p2
 
-def getCentralBB(p_main_1, p_main_2):
+
+def getCentralBB(p_main_1, p_main_2, bigger_than_256=False):
     center_x = (p_main_1[0] + p_main_2[0]) // 2
     center_y = (p_main_1[1] + p_main_2[1]) // 2
 
-    top_half_edge = 128
-    bottom_half_edge = 128
-    right_half_edge = 128
-    left_half_edge = 128
+    if bigger_than_256:
+        square_edge = max(p_main_2[1] - p_main_1[1], p_main_2[0] - p_main_1[0]) 
+        if square_edge % 2 == 1:
+            square_edge += 1
+
+        top_half_edge = square_edge // 2
+        bottom_half_edge = square_edge // 2
+        right_half_edge = square_edge // 2
+        left_half_edge = square_edge // 2
+    else:
+        top_half_edge = 128
+        bottom_half_edge = 128
+        right_half_edge = 128
+        left_half_edge = 128
 
     central_bb_p1_x = center_x - left_half_edge
     central_bb_p1_y = center_y - top_half_edge
@@ -166,13 +177,16 @@ while(True):
             drawExtremePoints(frame_bgr, lm, rm, tm, bm, (0,255,0))
     if len(contours) >= 1 and len(indices) > 0: # one of them is contours,the other is  indices. dont confuse
         p_main_1, p_main_2 = getBB(indices)
-        central_bb_p1, central_bb_p2 = getCentralBB(p_main_1, p_main_2)
-        cropped_hand_img = frame_bgr[central_bb_p1[1] : central_bb_p2[1], central_bb_p1[0] : central_bb_p2[0]]
-        lame_bb_p1, lame_bb_p2 = getLameBB(p_main_1, p_main_2)
-        #if (central_bb_p2[0] - central_bb_p1[0] != 256) or (central_bb_p2[1] - central_bb_p1[1] != 256):
-            
+        if (p_main_2[0] - p_main_1[0] > 256) or (p_main_2[1] - p_main_1[1] > 256):
+            central_bb_p1, central_bb_p2 = getCentralBB(p_main_1, p_main_2, bigger_than_256=True)
+            cropped_hand_img = frame_bgr[central_bb_p1[1] : central_bb_p2[1], central_bb_p1[0] : central_bb_p2[0]]
+            cropped_hand_img = cv2.resize(cropped_hand_img, (256, 256), interpolation=cv2.INTER_LINEAR)
+        else:
+            central_bb_p1, central_bb_p2 = getCentralBB(p_main_1, p_main_2)
+            cropped_hand_img = frame_bgr[central_bb_p1[1] : central_bb_p2[1], central_bb_p1[0] : central_bb_p2[0]]
         cv2.rectangle(frame_bgr, central_bb_p1, central_bb_p2, (255,255,255), 1) # white: square
-        cv2.rectangle(frame_bgr, lame_bb_p1, lame_bb_p2, (0,0,0), 2) # black: square
+        #lame_bb_p1, lame_bb_p2 = getLameBB(p_main_1, p_main_2)
+        #cv2.rectangle(frame_bgr, lame_bb_p1, lame_bb_p2, (0,0,0), 2) # black: square
         cv2.rectangle(frame_bgr, p_main_1, p_main_2, (0,0,255), 1) # red: rectangle
         
     # Display the resulting frame
