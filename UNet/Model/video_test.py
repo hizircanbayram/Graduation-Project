@@ -10,6 +10,8 @@ from unet20 import unet
 from keras.preprocessing.image import load_img
 from keras.preprocessing.image import img_to_array
 
+import matplotlib.pyplot as plt
+
 
 def getBB(points):
     #print(points)
@@ -19,6 +21,61 @@ def getBB(points):
     x2 = max(points[0])
     y2 = max(points[1])
     return (x1, y1), (x2, y2)
+
+def getLameBB(p_main_1, p_main_2):
+    center_x = (p_main_1[0] + p_main_2[0]) // 2
+    center_y = (p_main_1[1] + p_main_2[1]) // 2
+
+    top_half_edge = 128
+    bottom_half_edge = 128
+    right_half_edge = 128
+    left_half_edge = 128
+
+    central_bb_p1_x = center_x - left_half_edge
+    central_bb_p1_y = center_y - top_half_edge
+    central_bb_p2_x = center_x + right_half_edge
+    central_bb_p2_y = center_y + bottom_half_edge
+
+    central_bb_p1 = (central_bb_p1_x, central_bb_p1_y)
+    central_bb_p2 = (central_bb_p2_x, central_bb_p2_y)
+
+    return central_bb_p1, central_bb_p2
+
+def getCentralBB(p_main_1, p_main_2):
+    center_x = (p_main_1[0] + p_main_2[0]) // 2
+    center_y = (p_main_1[1] + p_main_2[1]) // 2
+
+    top_half_edge = 128
+    bottom_half_edge = 128
+    right_half_edge = 128
+    left_half_edge = 128
+
+    central_bb_p1_x = center_x - left_half_edge
+    central_bb_p1_y = center_y - top_half_edge
+    central_bb_p2_x = center_x + right_half_edge
+    central_bb_p2_y = center_y + bottom_half_edge
+
+    if central_bb_p1_x < 0:
+        central_bb_p2_x += abs(central_bb_p1_x) 
+        central_bb_p1_x = 0
+
+    if central_bb_p1_y < 0:
+        central_bb_p2_y += abs(central_bb_p1_y)
+        central_bb_p1_y = 0
+
+    if central_bb_p2_x > 511:
+        central_bb_p1_x -= central_bb_p2_x - 511
+        central_bb_p2_x = 511
+
+    if central_bb_p2_y > 511:
+        central_bb_p1_y -= central_bb_p2_y - 511
+        central_bb_p2_y = 511
+
+
+    central_bb_p1 = (central_bb_p1_x, central_bb_p1_y)
+    central_bb_p2 = (central_bb_p2_x, central_bb_p2_y)
+
+    return central_bb_p1, central_bb_p2
 
 
 
@@ -66,7 +123,7 @@ dependencies = {
     'iou_loss_score': iou_loss_score
 }
 model = load_model('check_points/unet20_50_512/5_temmuz_unet20_013_50.hdf5', custom_objects=dependencies)
-
+square_edges = []
 
 
 while(True):
@@ -108,18 +165,24 @@ while(True):
             drawExtremePoints(frame_bgr, lm, rm, tm, bm, (0,255,0))
     if len(contours) >= 1 and len(indices) > 0:
         p_main_1, p_main_2 = getBB(indices)
-        cv2.rectangle(frame_bgr, p_main_1, p_main_2, (0,0,255), 2) # red: rectangle
-        x1, y1 = p_main_1[0], p_main_1[1]
-        x2, y2 = p_main_2[0], p_main_2[1]        
-        square_edge = max(abs(x1-x2), abs(y1-y2))
-        square_p1 = p_main_1
-        square_p2 = (p_main_1[0] + square_edge, p_main_1[1] + square_edge)
-        cv2.rectangle(frame_bgr, square_p1, square_p2, (0,0,0), 2) # black: square
+        central_bb_p1, central_bb_p2 = getCentralBB(p_main_1, p_main_2)
+        lame_bb_p1, lame_bb_p2 = getLameBB(p_main_1, p_main_2)
+        if central_bb_p2[0] - central_bb_p1[0] != 256:
+            print('x not 256' )
+        if central_bb_p2[1] - central_bb_p1[1] != 256:
+            print('y not 256')
+        cv2.rectangle(frame_bgr, central_bb_p1, central_bb_p2, (255,255,255), 1) # white: square
+        cv2.rectangle(frame_bgr, lame_bb_p1, lame_bb_p2, (0,0,0), 2) # black: square
+        cv2.rectangle(frame_bgr, p_main_1, p_main_2, (0,0,255), 1) # red: rectangle
+        
     # Display the resulting frame
-    cv2.imshow('frame',frame_bgr)
+    cv2.imshow('frame', frame_bgr)
+    #cv2.waitKey(0)
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
-  
+
+plt.hist(np.array(square_edges))
+plt.show()
 # When everything done, release the capture
 cap.release()
 cv2.destroyAllWindows()
