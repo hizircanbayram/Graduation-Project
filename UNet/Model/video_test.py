@@ -22,19 +22,24 @@ def getBB(points):
 
 
 
-def getExtremeImg(im2, cnt):
+def getExtremeImg(img, cnt):
+    # https://stackoverflow.com/questions/51000056/find-contour-and-boundary-to-obtain-points-inside-image-opencv-python
     leftmost = tuple(cnt[cnt[:,:,0].argmin()][0])
     rightmost = tuple(cnt[cnt[:,:,0].argmax()][0])
     topmost = tuple(cnt[cnt[:,:,1].argmin()][0])
     bottommost = tuple(cnt[cnt[:,:,1].argmax()][0])
 
-    #--- drawing these points on the image ----
-    cv2.circle(im2, leftmost, 6, (0, 0, 255), -1)
-    cv2.circle(im2, rightmost, 6, (0, 0, 255), -1)
-    cv2.circle(im2, topmost, 6, (0, 255, 0), -1)
-    cv2.circle(im2, bottommost, 6, (0, 255, 0), -1)
+
 
     return leftmost, rightmost, topmost, bottommost
+
+
+
+def drawExtremePoints(img, lm, rm, tm, bm, clr):
+    cv2.circle(img, lm, 6, clr, -1)
+    cv2.circle(img, rm, 6, clr, -1)
+    cv2.circle(img, tm, 6, clr, -1)
+    cv2.circle(img, bm, 6,clr, -1)
 
 
 
@@ -89,6 +94,7 @@ while(True):
         p1_1, p1_2 = getBB(indices1)
         box1_area = (p1_2[0] - p1_1[0]) * (p1_2[1] - p1_1[1])
         if box1_area > 1000:
+            drawExtremePoints(frame_bgr, lm, rm, tm, bm, (255,0,0))
             indices = addPOintsToTheList(indices, lm, rm, tm, bm) # adding points to the real list where the BB of the hands will be extracted
     if len(contours) > 1:
         rect2 = cv2.minAreaRect(contours[1])
@@ -99,10 +105,16 @@ while(True):
         box2_area = (p2_2[0] - p2_1[0]) * (p2_2[1] - p2_1[1])
         if box2_area > 1000:
             indices = addPOintsToTheList(indices, lm, rm, tm, bm) # adding points to the real list where the BB of the hands will be extracted
+            drawExtremePoints(frame_bgr, lm, rm, tm, bm, (0,255,0))
     if len(contours) >= 1 and len(indices) > 0:
         p_main_1, p_main_2 = getBB(indices)
-        cv2.rectangle(frame_bgr, p_main_1, p_main_2, (0,0,255), 2) # kirmizi: iyi
-
+        cv2.rectangle(frame_bgr, p_main_1, p_main_2, (0,0,255), 2) # red: rectangle
+        x1, y1 = p_main_1[0], p_main_1[1]
+        x2, y2 = p_main_2[0], p_main_2[1]        
+        square_edge = max(abs(x1-x2), abs(y1-y2))
+        square_p1 = p_main_1
+        square_p2 = (p_main_1[0] + square_edge, p_main_1[1] + square_edge)
+        cv2.rectangle(frame_bgr, square_p1, square_p2, (0,0,0), 2) # black: square
     # Display the resulting frame
     cv2.imshow('frame',frame_bgr)
     if cv2.waitKey(1) & 0xFF == ord('q'):
