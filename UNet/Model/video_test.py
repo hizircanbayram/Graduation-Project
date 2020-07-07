@@ -162,7 +162,7 @@ while(True):
         indices1 = addPOintsToTheList(indices1, lm, rm, tm, bm)
         p1_1, p1_2 = getBB(indices1)
         box1_area = (p1_2[0] - p1_1[0]) * (p1_2[1] - p1_1[1])
-        if box1_area > 5000:
+        if box1_area > 7500:
             drawExtremePoints(frame_bgr, lm, rm, tm, bm, (255,0,0))
             indices = addPOintsToTheList(indices, lm, rm, tm, bm) # adding points to the real list where the BB of the hands will be extracted
     if len(contours) > 1:
@@ -172,7 +172,7 @@ while(True):
         indices2 = addPOintsToTheList(indices2, lm, rm, tm, bm)
         p2_1, p2_2 = getBB(indices2)
         box2_area = (p2_2[0] - p2_1[0]) * (p2_2[1] - p2_1[1])
-        if box2_area > 5000:
+        if box2_area > 7500:
             indices = addPOintsToTheList(indices, lm, rm, tm, bm) # adding points to the real list where the BB of the hands will be extracted
             drawExtremePoints(frame_bgr, lm, rm, tm, bm, (0,255,0))
     if len(contours) >= 1 and len(indices) > 0: # one of them is contours,the other is  indices. dont confuse
