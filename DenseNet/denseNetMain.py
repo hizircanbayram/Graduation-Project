@@ -62,9 +62,9 @@ def getOneHotLabel(img_name):
         return [0,0,0,0,0,0,0,1,0,0,0,0] 
     elif label == 'RubRightThumb':
         return [0,0,0,0,0,0,0,0,1,0,0,0] 
-    elif label == 'RubRightFingertips':
+    elif label == 'RubRightFingerTips' or label == 'RubRightFingertips':
         return [0,0,0,0,0,0,0,0,0,1,0,0] 
-    elif label == 'RubLeftFingerTips':
+    elif label == 'RubLeftFingerTips' or label == 'RubLeftFingertips':
         return [0,0,0,0,0,0,0,0,0,0,1,0] 
     elif label == 'RinseHands':
         return [0,0,0,0,0,0,0,0,0,0,0,1] 
@@ -75,20 +75,24 @@ def getOneHotLabel(img_name):
 
 
 
-params = {'dim': (512,512,3),
-          'batch_size': 128,
+params = {'dim': (256,256,3),
+        'batch_size':64                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  ,
           'shuffle': True} 
 fpath = "check_points/DenseNetWithoutUnet/" + "DenseNet_{epoch:02d}-{val_accuracy:.2f}.hdf5"
-dataset_dir = 'Classifier'
+dataset_dir = 'DenseNetDataset'
 
 nth_frame = 0
 optical_flow_dir = None
 partition, labels = fill_infos(dataset_dir)
+
+print(len(partition['validation']))
+
+
 training_generator   = DataGenerator(dataset_dir, 'train', partition['train'], labels, nth_frame, optical_flow_dir, **params)
 validation_generator = DataGenerator(dataset_dir, 'validation', partition['validation'], labels, nth_frame, optical_flow_dir, **params)
 
 check_point = ModelCheckpoint(fpath, monitor='val_accuracy',
-                              verbose=2, save_best_only=True, mode='max')
+                              verbose=2, save_best_only=False, mode='max')
 
 model = build_denseNet(params['dim'], 12)
 
@@ -97,7 +101,7 @@ model = build_denseNet(params['dim'], 12)
 
 
 
-#model.load_weights('check_points/unet20_30_256_motion_2_normalized/motion_unet22_19-0.96.hdf5')
+model.load_weights('4_temmuz_DenseNet_02-0.79.hdf5')
 history = model.fit_generator(generator=training_generator,
                     validation_data=validation_generator,
                     callbacks=[check_point],
